@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stroke Risk Prediction System | ML Health Assessment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result.high-risk {
+            background: #fee;
+            border-left: 5px solid #f44336;
+        }
+
+        .result.low-risk {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+        }
+
+        .result h3 {
+            margin-bottom: 10px;
+        }
+
+        .probability-bar {
+            margin-top: 15px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 30px;
+        }
+
+        .probability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #f44336);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.5s ease;
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loader div {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #ffebee;
+            border-left: 5px solid #f44336;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Stroke Risk Prediction System</h1>
+            <p>Machine Learning powered health risk assessment</p>
+        </div>
+        
+        <div class="form-container">
+            <form id="predictionForm">
+                <div class="row">
+                    <div class="form-group">
+                        <label>Gender *</label>
+                        <select name="gender" required>
+                            <option value="Female">Female</option>
+                            <option value="Male">Male</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Age (years) *</label>
+                        <input type="number" name="age" step="1" required placeholder="e.g., 45" min="0" max="120">
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="form-group">
+                        <label>Hypertension</label>
+                        <select name="hypertension" required>
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Heart Disease</label>
+                        <select name="heart_disease" required>
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="form-group">
+                        <label>Ever Married</label>
+                        <select name="ever_married" required>
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Residence Type</label>
+                        <select name="Residence_type" required>
+                            <option value="Rural">Rural</option>
+                            <option value="Urban">Urban</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Work Type</label>
+                    <select name="work_type" required>
+                        <option value="private">Private Employee</option>
+                        <option value="self-employed">Self-employed</option>
+                        <option value="govt_job">Government Job</option>
+                        <option value="children">Children</option>
+                        <option value="never_worked">Never Worked</option>
+                    </select>
+                </div>
+                
+                <div class="row">
+                    <div class="form-group">
+                        <label>Average Glucose Level (mg/dL) *</label>
+                        <input type="number" name="avg_glucose_level" step="0.01" required placeholder="e.g., 100.5" min="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>BMI (kg/m²) *</label>
+                        <input type="number" name="bmi" step="0.1" required placeholder="e.g., 25.5" min="0" max="100">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Smoking Status</label>
+                    <select name="smoking_status" required>
+                        <option value="never smoked">Never Smoked</option>
+                        <option value="formerly smoked">Formerly Smoked</option>
+                        <option value="smokes">Currently Smokes</option>
+                        <option value="Unknown">Unknown</option>
+                    </select>
+                </div>
+                
+                <button type="submit">🔍 Predict Stroke Risk</button>
+            </form>
+            
+            <div class="loader" id="loader">
+                <div></div>
+                <p style="margin-top: 10px;">Analyzing health data...</p>
+            </div>
+            
+            <div class="error" id="error"></div>
+            
+            <div class="result" id="result"></div>
+        </div>
+    </div>
+    
+    <script>
+        const form = document.getElementById('predictionForm');
+        const loader = document.getElementById('loader');
+        const resultDiv = document.getElementById('result');
+        const errorDiv = document.getElementById('error');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Hide previous results
+            resultDiv.style.display = 'none';
+            errorDiv.style.display = 'none';
+            
+            // Show loader
+            loader.style.display = 'block';
+            
+            try {
+                const formData = new FormData(form);
+                
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                // Hide loader
+                loader.style.display = 'none';
+                
+                if (!result.success && result.error) {
+                    errorDiv.innerHTML = `<strong>❌ Error:</strong> ${result.error || result.message}`;
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                // Show result
+                const riskClass = result.prediction === 1 ? 'high-risk' : 'low-risk';
+                const riskIcon = result.prediction === 1 ? '⚠️' : '✅';
+                const probabilityPercent = (result.probability * 100).toFixed(1);
+                
+                resultDiv.className = `result ${riskClass}`;
+                resultDiv.innerHTML = `
+                    <h3>${riskIcon} Prediction Result</h3>
+                    <p><strong>Risk Level:</strong> ${result.risk_level}</p>
+                    <p><strong>Probability:</strong> ${probabilityPercent}%</p>
+                    <div class="probability-bar">
+                        <div class="probability-fill" style="width: ${result.probability * 100}%">
+                            ${probabilityPercent}%
+                        </div>
+                    </div>
+                    <p style="margin-top: 15px;"><strong>Recommendation:</strong> ${result.message}</p>
+                `;
+                resultDiv.style.display = 'block';
+                
+                // Scroll to result
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+            } catch (error) {
+                loader.style.display = 'none';
+                errorDiv.innerHTML = '<strong>❌ Network Error:</strong> Unable to connect to server. Please try again.';
+                errorDiv.style.display = 'block';
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
