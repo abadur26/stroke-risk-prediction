@@ -44,7 +44,7 @@ Stroke is a leading cause of disability worldwide. Early prediction can help in 
 ## 📁 Project Structure
 stroke-prediction-system/
 ├── app.py # Flask web application
-├── train_model.py # Model training script
+├── train_model.ipynb # Model training script
 ├── requirements.txt # Python dependencies
 ├── .gitignore # Git ignore file
 ├── README.md # Project documentation
